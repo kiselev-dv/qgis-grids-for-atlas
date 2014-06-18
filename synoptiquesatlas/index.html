@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Grids for Atlas documentation</title>
+<meta http-equiv="Content-Language" content="English" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<div id="wrap">
+<div id="header">
+      <h1>Grids for Atlas documentation</h1>
+</div>
+<div class="middle">
+    <h2><a name="overview"></a>Overview</h2>
+    <p>Grids for Atlas plugin (in French "Synoptiques pour l'atlas") allows you to create a vector layer grid for an atlas, in an automatid way.
+It uses a coverage layer's geometries which contains the area to cartography. This layer will define the grid extent.
+It also uses a composer to define the dimensions of a single ladder into the grid.<br />
+Ladder attribute ids are generated for the grid to be used as inputs for the Atlas plugin and define the atlas sheets numbers.<br />
+You will be able to create two differents types of grids : the classic grid which is particularly adapted to non-linear polygonal coverage layers, or the dynamic grid, more adapted to linear shapes.
+    </p>
+    <h2><a name="project"></a>Create a QGis project</h2>
+      <p>
+      You first have to create a QGis project containing a vector coverage layer for your grid</p><p>
+      <a href="img/capture1.png"><img src="img/capture1.png" width="500"/></a>
+      </p>
+      <h2><a name="composer"></a>Create a composer</h2>
+      <p>
+      <p align = left>Then you create a composer, containing a map object which will define the grid ladder's dimensions.</p>
+      <a href="img/capture2.png"><img src="img/capture2.png" width="500"/></a>      
+      <p>Procedure :</p>      
+      <ul>
+          <li>Zoom in the project map window to the scale you want as reference for the grid ladder dimensions.</li>
+          <li>Create a new composer and insert a map object.</li>
+          <li>Adapt the map object as you want, and fix for one moment your mouse coursor on it. A tooltip appears that gives you the name of map object to remember (<strong>Map 0</strong> for example).</li>
+      </ul>
+      </p>
+      <h2><a name="main"></a>Grids for Atlas plugin</h2>
+      <p>
+      You're now ready to launch the plugin. Find the menu entry and click on the Synoptiques Atlas or Grids for Atlas button. The following window should appear.      
+      </p>
+      <p>
+      <a href="img/capture3en.png"><img src="img/capture3en.png" width="500"/></a>
+      <p>You have to fill in the form before clicking on <strong>Create grid(s)</strong> to launch the grid generation. Here are the different options :</p>
+      <dl>
+          <dt>Generate classic grid</dt><dd>Generate a classic grid covering the entire coverage layer.</dd>
+          <dt>Generate dynamic grid</dt><dd>Generate a dynamic synoptic, particularly adapted for linear-shaped coverage layers.</dd>
+          <dt>Coverage layer</dt><dd>Choose the (vector) coverage layer, that corresponds to the extent you want to cover with the grid.</dd>
+          <dt>Composer</dt><dd>Select the composer which contains the map object with the extent that defines the grid ladder dimensions.</dd>
+          <dt>Refresh composers list</dt><dd>If you have created a new composer, this will permit you to refresh the composers list.</dd>
+          <dt>Show</dt><dd>Show the composer window corresponding to the selected element in the list.</dd>
+          <dt>Composer map object</dt><dd>Choose the reference map object into the composer (you can check the name in the composer window, fixing for one moment the cursor on it).</dd>
+          <dt>Output directory</dt><dd>Select the outfiles directory where grid (or synoptiques) shapefiles will be written, using the "Browse" button. Warning : if a grid has already been generated, please delete the corresponding layers in the QGis project before launching the Grid tool again!</dd>
+          <dt>Create grid(s)</dt><dd>The "Create grid(s)" button lauches the grid(s) generation, and writes the outputs in the chosen directory.</dd>
+      </dl>
+      </p>    
+      <h2> <a name="results" ></a>Results examples</h2>
+      <p>
+      The results are written in the specified directory and displayed in the map window.      
+      </p>
+      <p>
+      Result example for a non-linear coverage layer with classic grid :
+      </p>
+      <p>      
+      <a href="img/capture4.png"><img src="img/capture4.png" width="500"/></a>
+      </p>
+      <p>
+      And result example for a linear coverage layer with dynamic grid :
+      </p>
+      <p>      
+      <a href="img/capture5.png"><img src="img/capture5.png" width="500"/></a>
+      </p>
+      <h2> <a name="rectifs" ></a>Possible corrections to add</h2>
+      <p>
+      It may be micro-areas of the coverage layer still not covered by the grid. In that case, you will need to move by hand in an editing session the concerned ladders.
+      </p>
+</div>
+<div class="right">
+<h2>Navigation</h2>
+
+<ul>
+
+<li><a href="#overview">Overview</a></li>
+<li><a href="#project">Create a QGis project</a></li>
+<li><a href="#composer">Create a composer</a></li>
+<li><a href="#main">Grids for Atlas plugin</a></li>
+<li><a href="#results">Results examples</a></li>
+<li><a href="#rectifs">Possible corrections to add</a></li>
+
+</ul>
+		
+</div>
+
+<div id="clear"></div>
+
+</div>
+
+<div id="footer">
+Design by <a href="http://www.minimalistic-design.net">Minimalistic Design</a>
+</div>
+</body>
+</html>

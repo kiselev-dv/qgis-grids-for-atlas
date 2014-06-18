@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Documentation de l'outil Synoptiques pour l'Atlas</title>
+<meta http-equiv="Content-Language" content="French" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<div id="wrap">
+<div id="header">
+      <h1>Documentation Synoptiques Atlas</h1>
+</div>
+<div class="middle">
+    <h2><a name="overview"></a>Vue globale</h2>
+    <p>Le plugin Synoptiques Atlas vous permet de créer un synoptique, c'est-à-dire une grille pour un atlas, de facon automatique.
+On utilise une couche d'emprise contenant les géométries englobant la zone à cartographier. Cette couche va définir l'étendue du synoptique.
+On utilisera un composeur pour définir la taille d'une maille du synoptique.<br />
+Des identifiants sont affectés à chaque maille pour pouvoir utiliser le synoptique en entrée du plugin Atlas, et numéroter ensuite les planches de l'atlas.<br />
+On aura la possibilité de créer deux types de synoptiques:  le synoptique basique ou "grille" qui est particulièrement adapté pour des couches d'emprise polygonales non linéaires, ou le synoptique "dynamique" plus adapté aux emprises de forme plus linéaires.
+    </p>
+    <h2><a name="project"></a>Créer un projet QGis</h2>
+      <p>
+      Vous devez créer un projet QGis contenant une couche vecteur d'emprise pour votre synoptique.</p><p>
+      <a href="img/capture1.png"><img src="img/capture1.png" width="500"/></a>
+      </p>
+      <h2><a name="composer"></a>Créer un composeur</h2>
+      <p>
+      <p align = left>Ensuite vous créez un composeur, avec à l'intérieur un objet carte qui définira la taille de la maille du synoptique.</p>
+      <a href="img/capture2.png"><img src="img/capture2.png" width="500"/></a>      
+      <p>Démarche :</p>      
+      <ul>
+          <li>Zoomer dans la fenêtre carte du projet à l'échelle que vous voulez comme référence de taille de maille.</li>
+          <li>Créez un nouveau composeur et insérez un objet carte.</li>
+          <li>Adaptez l'objet carte comme vous le souhaitez, et laisser un moment votre curseur de souris dessus. Une bulle d'info apparaît et vous donne le nom de l'objet carte à retenir (<strong>Carte 0</strong> par exemple).</li>
+      </ul>
+      </p>
+      <h2><a name="main"></a>Plugin Synoptiques Atlas</h2>
+      <p>
+      Vous êtes maintenant à même de lancer le plugin. Trouvez l'entrée de menu et cliquez sur le bouton Synoptiques Atlas. Vous devriez voir apparaître la fenêtre suivante.
+      </p>
+      <p>
+      <a href="img/capture3fr.png"><img src="img/capture3fr.png" width="500"/></a>
+      <p>Vous devez remplir le formulaire suivant avant de cliquer sur <strong>Créer le(s) synoptique(s)</strong> pour lancer la création des synoptiques. Voici les différentes options :</p>
+      <dl>
+          <dt>Générer le synoptique grille</dt><dd>Génération d'un synoptique classique couvrant toute la couche d'emprise.</dd>
+          <dt>Générer le synoptique dynamique</dt><dd>Génération d'un synoptique adapté dynamiquement à la forme de la couche d'emprise. Celui-ci est particulièrement adapté pour les couches d'emprises de forme linéaires.</dd>
+          <dt>Couche d'emprise</dt><dd>On choisit la couche (vecteur) d'emprise correspondant à l'étendue que l'on veut couvrir à l'aide du synoptique.</dd>
+          <dt>Composeur</dt><dd>On sélectionne le composeur où l'on a défini un objet carte dont l'étendue défini la taille d'une maille du synoptique.</dd>
+          <dt>Rafraîchir la liste des composeurs</dt><dd>Si vous avez créé un nouveau composeur, ce bouton vous permet de rafraîchir la liste des composeurs.</dd>
+          <dt>Afficher le composeur</dt><dd>Permet d'afficher la fenêtre du composeur sélectionné dans la liste pour contrôle.</dd>
+          <dt>Objet Carte du composeur</dt><dd>On choisit l'objet carte de référence dans notre composeur (le nom est vérifiable dans la fenêtre composeur en laissant le curseur un moment sur l'objet carte en question).</dd>
+          <dt>Répertoire des sorties</dt><dd>Il faut sélectionner un répertoire de sortie où sera généré le(s) fichier(s) shape synoptique, à l'aide du bouton "Parcourir". Attention, si un synoptique a déjà été généré, veillez à supprimer les couches du projet Qgis avant de relancer l'outil Synoptiques.</dd>
+          <dt>Créer les synoptiques</dt><dd>Le bouton "Créer les synoptiques" lance la création du ou des synoptiques, et écrit les sorties dans le répértoire choisi.</dd>
+      </dl>
+      </p>    
+      <h2> <a name="results" ></a>Exemples de résultats</h2>
+      <p>
+      Les résultats sont écrits dans le répertoire spécifié et affichés dans la fenêtre Qgis.
+      </p>
+      <p>
+      Exemple de résultat pour une couche d'emprise non linéaire avec synoptique grille :
+      </p>
+      <p>      
+      <a href="img/capture4.png"><img src="img/capture4.png" width="500"/></a>
+      </p>
+      <p>
+      Et exemple de résultat pour une couche d'emprise linéaire avec synoptique dynamique :
+      </p>
+      <p>      
+      <a href="img/capture5.png"><img src="img/capture5.png" width="500"/></a>
+      </p>
+      <h2> <a name="rectifs" ></a>Rectification éventuelles</h2>
+      <p>
+      Il se peut qu'il subsiste des microzones de la couche d'emprise non couvertes par le synoptique. Dans ce cas il conviendra de replacer à la main les mailles concernées.
+      </p>
+</div>
+<div class="right">
+<h2>Navigation</h2>
+
+<ul>
+
+<li><a href="#overview">Vue globale</a></li>
+<li><a href="#project">Créer un projet QGis</a></li>
+<li><a href="#composer">Créer un composeur</a></li>
+<li><a href="#main">Plugin Synoptiques Atlas</a></li>
+<li><a href="#results">Exemple de résultats</a></li>
+<li><a href="#rectifs">Rectifications éventuelles</a></li>
+
+</ul>
+		
+</div>
+
+<div id="clear"></div>
+
+</div>
+
+<div id="footer">
+Design by <a href="http://www.minimalistic-design.net">Minimalistic Design</a>
+</div>
+</body>
+</html>
