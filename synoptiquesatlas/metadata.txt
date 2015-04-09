@@ -1,18 +1,11 @@
-# This file contains metadata for your plugin. Beginning
-# with version 1.8 this is the preferred way to supply information about a
-# plugin. The current method of embedding metadata in __init__.py will
-# be supported until version 2.0
-
-# This file should be included when you package your plugin.
-
 [general]
-name=Grids for Atlas
-description=Create grids for atlas
-version=version 0.3.0
-author=Bertrand Chaussat (Biotope)
-email=dev-qgis@biotope.fr
-qgisMinimumVersion=1.8
+name=Grids for Atlas 2
+description=Create grids for atlas (fork of Grids for Atlas)
+version=version 0.4.0
+author=Dmirty Kiselev
+email=dmitry.v.kiselev@gmail.com
+qgisMinimumVersion=2.0
 qgisMaximumVersion=2.99
 class_name=SynoptiquesAtlas
-website=www.biotope.fr
+website=https://github.com/kiselev-dv/qgis-grids-for-atlas
 experimental=True
