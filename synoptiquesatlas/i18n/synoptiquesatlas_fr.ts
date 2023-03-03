@@ -174,7 +174,7 @@ du composeur :</translation>
     </message>
     <message>
         <location filename="synoptiquesatlas.py" line="214"/>
-        <source>Please enter an existant directory name</source>
+        <source>Please enter an existing Outfiles directory</source>
         <translation>Veuillez entrer un nom de repertoire de sortie existant</translation>
     </message>
     <message>
