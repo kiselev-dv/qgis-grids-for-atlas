@@ -125,6 +125,7 @@ class SynoptiquesAtlas(object):
     self.cLayer = self.getVectorLayerByName(self.dlg.ui.cbbInLayer.currentText())
 
   def updateLayouts(self):
+    #ajh: todo figure out how to make it automatically select the first Layout if there is one when starting the plugin
     self.dlg.ui.cbbComp.clear()
     projectInstance = QgsProject.instance()
     projectLayoutManager = projectInstance.layoutManager()
