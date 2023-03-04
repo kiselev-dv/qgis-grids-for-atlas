@@ -78,7 +78,7 @@ class SynoptiquesAtlas(object):
     # connect signals
     self.dlg.ui.btnCreerSyno.clicked.connect(self.creerSyno)
     # layout changed, update maps
-    # ajh: don't need this if we don't allow to select map
+    # ajh: since we now don't allow to select the map we only use this to update self.layout 
     self.dlg.ui.cbbComp.currentIndexChanged.connect(self.updateMaps)
     # refresh inLayer box
     self.dlg.ui.cbbInLayer.currentIndexChanged.connect(self.onLayerChange)
@@ -102,7 +102,7 @@ class SynoptiquesAtlas(object):
 
   def updateBoxes(self):
     self.updateLayers()
-    self.updateLayouts
+    self.updateLayouts()
     self.updateMaps()
 
   def updateLayers(self):
@@ -125,12 +125,10 @@ class SynoptiquesAtlas(object):
     self.cLayer = self.getVectorLayerByName(self.dlg.ui.cbbInLayer.currentText())
 
   def updateLayouts(self):
-    #ajh: todo figure out how to make it automatically select the first Layout if there is one when starting the plugin
     self.dlg.ui.cbbComp.clear()
     projectInstance = QgsProject.instance()
     projectLayoutManager = projectInstance.layoutManager()
     self.layouts = projectLayoutManager.printLayouts()
-    #ajh todo get this working
     for cv in self.layouts:
       #QMessageBox.information(self.iface.mainWindow(),"Info", \
       #    "testing")
