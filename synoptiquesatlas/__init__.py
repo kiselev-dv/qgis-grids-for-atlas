@@ -19,7 +19,8 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
-from PyQt4.QtCore import *
+from __future__ import absolute_import
+# from PyQt4.QtCore import *
 
 def name():
     return "Grids for Atlas"
@@ -34,5 +35,5 @@ def qgisMinimumVersion():
 
 def classFactory(iface):
     # load SynoptiquesAtlas class from file SynoptiquesAtlas
-    from synoptiquesatlas import SynoptiquesAtlas
+    from .synoptiquesatlas import SynoptiquesAtlas
     return SynoptiquesAtlas(iface)

@@ -21,22 +21,25 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import absolute_import
+from builtins import object
 import os
 import math
 # Import the PyQt and QGIS libraries
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import QFileInfo, QCoreApplication, QObject, QVariant
+from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import *
 from qgis.gui import *
 from qgis.utils import *
 # Initialize Qt resources from file resources.py
-import resources_rc
+from . import resources_rc
 # Import the code for the dialog
-from synoptiquesatlasdialog import SynoptiquesAtlasDialog
+from .synoptiquesatlasdialog import SynoptiquesAtlasDialog
 #from ui_help_window import Ui_help_window
-from ui_about_window import Ui_About_window
+from .ui_about_window import Ui_About_window
 
-class SynoptiquesAtlas:
+class SynoptiquesAtlas(object):
 
   def __init__(self, iface):
     # Save reference to the QGIS interface
@@ -44,9 +47,8 @@ class SynoptiquesAtlas:
     # a reference to our map canvas
     self.canvas = self.iface.mapCanvas()
     # Setup directory
-    self.user_plugin_dir = QFileInfo(QgsApplication.qgisUserDbFilePath()).path() + "/python/plugins"
-    self.syn_atlas_plugin_dir = self.user_plugin_dir + "/synoptiquesatlas"
-    # Translation to English    
+    self.syn_atlas_plugin_dir = os.path.dirname(__file__)
+    # Translation to English
     #locale = QSettings().value("locale/userLocale").toString()
     #self.myLocale = locale[0:2]
     #if QFileInfo(self.syn_atlas_plugin_dir).exists():
@@ -55,7 +57,7 @@ class SynoptiquesAtlas:
     #  self.translator = QTranslator()
     #  self.translator.load(localePath)
     #  if qVersion() > '4.3.3':
-    #        QCoreApplication.installTranslator(self.translator)  
+    #        QCoreApplication.installTranslator(self.translator)
     # create and show the dialog
     self.dlg = SynoptiquesAtlasDialog()
 
@@ -68,27 +70,28 @@ class SynoptiquesAtlas:
     # Create action for help dialog
     self.action_help = QAction(QIcon(":/plugins/synoptiquesatlas/about.png"), QCoreApplication.translate("synoptiquesatlas", "&Help..."), self.iface.mainWindow())
     # connect the action to the run method
-    QObject.connect(self.action, SIGNAL("triggered()"), self.run)
+    self.action.triggered.connect(self.run)
     # connect about action to about dialog
-    QObject.connect(self.action_about, SIGNAL("triggered()"), self.showAbout)    
+    self.action_about.triggered.connect(self.showAbout)
     # connect help action to help dialog
-    QObject.connect(self.action_help, SIGNAL("triggered()"), self.showHelp)
+    self.action_help.triggered.connect(self.showHelp)
     # connect signals
-    QObject.connect(self.dlg.ui.btnCreerSyno, SIGNAL("clicked()"), self.creerSyno)
-    # composer changed, update maps
-    QObject.connect(self.dlg.ui.cbbComp, SIGNAL('currentIndexChanged(int)'), self.updateMaps)    
+    self.dlg.ui.btnCreerSyno.clicked.connect(self.creerSyno)
+    # layout changed, update maps
+    # ajh: since we now don't allow to select the map we only use this to update self.layout 
+    self.dlg.ui.cbbComp.currentIndexChanged.connect(self.updateMaps)
     # refresh inLayer box
-    QObject.connect(self.dlg.ui.cbbInLayer, SIGNAL('currentIndexChanged(int)'), self.onLayerChange)
+    self.dlg.ui.cbbInLayer.currentIndexChanged.connect(self.onLayerChange)
     # browse button
-    QObject.connect(self.dlg.ui.btnBrowse, SIGNAL('clicked()'), self.updateOutputDir)
+    self.dlg.ui.btnBrowse.clicked.connect(self.updateOutputDir)
     # refresh template button
-    QObject.connect(self.dlg.ui.btnUpdate, SIGNAL('clicked()'), self.updateComposers)
-    # show composer
-    QObject.connect(self.dlg.ui.btnShow, SIGNAL('clicked()'), self.showComposer)
+    self.dlg.ui.btnUpdate.clicked.connect(self.updateLayouts)
+    # show layout
+    self.dlg.ui.btnShow.clicked.connect(self.showLayout)
     # show about dialog
-    QObject.connect(self.dlg.ui.aboutButton, SIGNAL('clicked()'), self.showAbout)
+    self.dlg.ui.aboutButton.clicked.connect(self.showAbout)
     # show help dialog
-    QObject.connect(self.dlg.ui.helpButton, SIGNAL('clicked()'), self.showHelp)
+    self.dlg.ui.helpButton.clicked.connect(self.showHelp)
     # Add toolbar button and menu item
     self.iface.addToolBarIcon(self.action)
     self.iface.addPluginToMenu("&Grids for Atlas", self.action)
@@ -99,7 +102,7 @@ class SynoptiquesAtlas:
 
   def updateBoxes(self):
     self.updateLayers()
-    self.updateComposers()
+    self.updateLayouts()
     self.updateMaps()
 
   def updateLayers(self):
@@ -110,8 +113,8 @@ class SynoptiquesAtlas:
 
   # (c) Carson Farmer / fTools
   def getVectorLayerByName(self,myName):
-    layermap = QgsMapLayerRegistry.instance().mapLayers()
-    for name, layer in layermap.iteritems():
+    layermap = QgsProject.instance().mapLayers()
+    for name, layer in layermap.items():
       if layer.type() == QgsMapLayer.VectorLayer and layer.name() == myName:
         if layer.isValid():
           return layer
@@ -121,29 +124,27 @@ class SynoptiquesAtlas:
   def onLayerChange(self):
     self.cLayer = self.getVectorLayerByName(self.dlg.ui.cbbInLayer.currentText())
 
-  def updateComposers(self):
+  def updateLayouts(self):
     self.dlg.ui.cbbComp.clear()
-    compos = self.iface.activeComposers()
-    for cv in compos:
-      #self.dlg.ui.cbbComp.addItem(cv.composerWindow().windowTitle(), QVariant(cv))
-      self.dlg.ui.cbbComp.addItem(cv.composerWindow().windowTitle(), cv)
-    self.composer = self.dlg.ui.cbbComp.itemData(self.dlg.ui.cbbComp.currentIndex())#.toPyObject()
- 
+    projectInstance = QgsProject.instance()
+    projectLayoutManager = projectInstance.layoutManager()
+    self.layouts = projectLayoutManager.printLayouts()
+    for cv in self.layouts:
+      #QMessageBox.information(self.iface.mainWindow(),"Info", \
+      #    "testing")
+      self.dlg.ui.cbbComp.addItem(cv.name(), cv)
+    self.layout = self.dlg.ui.cbbComp.itemData(self.dlg.ui.cbbComp.currentIndex())#.toPyObject()
+
   def updateMaps(self):
-    self.dlg.ui.cbbMap.clear()
     if self.dlg.ui.cbbComp.currentIndex() != -1:
-      self.composer = self.dlg.ui.cbbComp.itemData(self.dlg.ui.cbbComp.currentIndex())#.toPyObject()
-      for item in self.composer.composition().items():
-        if item.type() == QgsComposerItem.ComposerMap:
-          self.dlg.ui.cbbMap.addItem(QCoreApplication.translate("synoptiquesatlas", "Map ") + "%s"% item.id(), item.id)
-   
-  def showComposer(self):
-    self.composer.composerWindow().show()
-    self.composer.composerWindow().activate() 
+      self.layout = self.layouts[self.dlg.ui.cbbComp.currentIndex()]
+
+  def showLayout(self):
+    iface.openLayoutDesigner(self.layout)
 
   def updateOutputDir(self):
     self.dlg.ui.lieOutDir.setText(QFileDialog.getExistingDirectory(self.dlg, \
-      QCoreApplication.translate("synoptiquesatlas", "Choose output directory"))) 
+      QCoreApplication.translate("synoptiquesatlas", "Choose output directory")))
 
   def unload(self):
     # Remove the plugin menu item and icon
@@ -158,15 +159,15 @@ class SynoptiquesAtlas:
     if os.path.exists(self.dlg.ui.lieOutDir.text()):
       self.gridSynopt = self.dlg.ui.chkGrille.isChecked()
       self.dynSynopt = self.dlg.ui.chkDyn.isChecked()
-      if self.gridSynopt or self.dynSynopt:           
-        compos = self.iface.activeComposers()
-        if compos:         
-          cview = compos[self.dlg.ui.cbbComp.currentIndex()]
-          cmap = self.dlg.ui.cbbMap.itemData(self.dlg.ui.cbbMap.currentIndex())
+      if self.gridSynopt or self.dynSynopt:
+        if self.layouts:
+          #ajh: we'll retain updateMaps() for this
+          #self.layout = layouts[self.dlg.ui.cbbComp.currentIndex()]
+          # ajh: we probably don't need to select the map; just use the referenceMap
+          cmap = self.layout.referenceMap()
           if cmap:
-            self.mapItem = cview.composition().getComposerMapById(cmap())
-            self.ladderHeight = self.mapItem.extent().height()
-            self.ladderWidth = self.mapItem.extent().width()
+            self.ladderHeight = cmap.extent().height()
+            self.ladderWidth = cmap.extent().width()
             self.ladderOvrlpPercent = float(self.dlg.ui.overlapInp.text())
             if self.ladderOvrlpPercent < 100 and self.ladderOvrlpPercent >= 0:
               self.overlapW = self.ladderWidth * self.ladderOvrlpPercent / 100;
@@ -200,20 +201,20 @@ class SynoptiquesAtlas:
                     #elif layer.isUsingRendererV2():
                     # new symbology - subclass of QgsFeatureRendererV2 class
                     #  rendererV2 = layer.rendererV2()  
-                  # Grid layer was created, access to the second stage            
+                  # Grid layer was created, access to the second stage
                   if self.dynSynopt:
                     self.finalSynopt_shape_path = self.dlg.ui.lieOutDir.text() + QCoreApplication.translate("synoptiquesatlas","/dyn_grid.shp")
-                    self.intersect(self.bcLayer,self.sLayer)    
+                    self.intersect(self.bcLayer,self.sLayer)
                     self.createIntersectionLayer()
-                    self.new_ladders_list = []                
-                    self.sLayer2 = self.centroidsToNewSyno(self.new_ladders_list)                
+                    self.new_ladders_list = []
+                    self.sLayer2 = self.centroidsToNewSyno(self.new_ladders_list)
                     self.parseSyno()
                     self.final_ladders_list = []
                     self.sLayer3 = self.centroidsToNewSyno(self.final_ladders_list)
                     self.fill_references(self.sLayer3)
                     self.createPhysLayerFromList(self.finalSynopt_shape_path, self.sLayer3)
                     self.sLayer3 = self.loadQgsVectorLayer(self.finalSynopt_shape_path, \
-                      QCoreApplication.translate("synoptiquesatlas","dynamic grid"))                    
+                      QCoreApplication.translate("synoptiquesatlas","dynamic grid"))
                 else:
                   QMessageBox.information(self.iface.mainWindow(),"Info", \
                     QCoreApplication.translate("synoptiquesatlas","Coverage layer is not vector type"))
@@ -222,33 +223,31 @@ class SynoptiquesAtlas:
                   QCoreApplication.translate("synoptiquesatlas","Please select a coverage layer to generate grid"))
             else:
               QMessageBox.information(self.iface.mainWindow(),"Info", \
-                QCoreApplication.translate("synoptiquesatlas","Overlap % must bee between 0 and 100"))
+                QCoreApplication.translate("synoptiquesatlas","Overlap % must be between 0 and 100"))
           else:
               QMessageBox.information(self.iface.mainWindow(),"Info", \
-                  QCoreApplication.translate("synoptiquesatlas","There is no map object for print composer selected"))
+                  QCoreApplication.translate("synoptiquesatlas","There is no map object for print layout selected"))
         else:
           QMessageBox.information(self.iface.mainWindow(),"Info", \
-            QCoreApplication.translate("synoptiquesatlas","Please select a print composer, if none is active you have to create it"))
+            QCoreApplication.translate("synoptiquesatlas","Please select a print layout, if none is active you have to create it"))
       else:
         QMessageBox.information(self.iface.mainWindow(),"Info", QCoreApplication.translate("synoptiquesatlas","Choose a grid type"))
     else:
-      QMessageBox.information(self.iface.mainWindow(),"Info", QCoreApplication.translate("synoptiquesatlas","Please enter an existant directory name"))
+      QMessageBox.information(self.iface.mainWindow(),"Info", QCoreApplication.translate("synoptiquesatlas","Please enter an existing OutFiles directory"))
 
   def doBuffer(self):
     maxDim = max(self.ladderHeight,self.ladderWidth)
     ratio = 1000./2970
-    bufferLength = maxDim * ratio   
+    bufferLength = maxDim * ratio
     self.bcLayer = QgsVectorLayer("Polygon" + "?" + self.URIcrs, "buffer_layer", "memory")
     pr = self.bcLayer.dataProvider()
-    pr.addAttributes([QgsField("ID_BUFFER", QVariant.Int)])    
+    pr.addAttributes([QgsField("ID_BUFFER", QVariant.Int)])
     i = 0    
     for feature in self.cLayer.dataProvider().getFeatures():
       fet = QgsFeature()
       bGeom = feature.geometry().buffer(bufferLength,2)
       fet.setGeometry(bGeom)
-      fet.setFeatureId(i)
-      pr.addFeatures([fet])       
-      i = i + 1
+      pr.addFeatures([fet])
     self.bcLayer.commitChanges()
     self.bcLayer.updateExtents()
 
@@ -259,28 +258,28 @@ class SynoptiquesAtlas:
     pr.addAttributes([QgsField("ID_MAILLE", QVariant.Int), QgsField("row", QVariant.Int), QgsField("col", QVariant.Int)])
     layer.updateFields()
     # Initial settings
-    provider_perimetre = self.cLayer.dataProvider()    
+    provider_perimetre = self.cLayer.dataProvider()
     #feat_perimetre = QgsFeature()
     ladderHeight = self.ladderHeight
-    ladderWidth = self.ladderWidth            
+    ladderWidth = self.ladderWidth
     ladder_id = 0
     yMax = self.extent.yMaximum()
     yMin = yMax - ladderHeight
     widthSum = 0
-    heightSum = 0 
+    heightSum = 0
     row = 0
-    # Build columns           
-    while heightSum < self.extent.height():            
+    # Build columns
+    while heightSum < self.extent.height():
       widthSum = 0
       col = 0
       xMin = self.extent.xMinimum()
       xMax = xMin + ladderWidth
-      # Build lines               
-      while widthSum < self.extent.width():          
+      # Build lines
+      while widthSum < self.extent.width():
         # Create geometry
         ladder = QgsRectangle(xMin - self.overlapW, yMin - self.overlapH, xMax + self.overlapW, yMax + self.overlapH)
         request=QgsFeatureRequest()
-        request.setFilterRect(ladder)        
+        request.setFilterRect(ladder)
         for f in provider_perimetre.getFeatures(request):
           ladder_id = ladder_id + 1
           # Add ladder to layer
@@ -304,18 +303,18 @@ class SynoptiquesAtlas:
   def fill_references(self, layer):
     pr = layer.dataProvider()
     pr.addAttributes([QgsField("above", QVariant.Int), QgsField("below", QVariant.Int),
-     QgsField("left", QVariant.Int), QgsField("right", QVariant.Int), 
-     QgsField("aboveleft", QVariant.Int), QgsField("aboveright", QVariant.Int), 
+     QgsField("left", QVariant.Int), QgsField("right", QVariant.Int),
+     QgsField("aboveleft", QVariant.Int), QgsField("aboveright", QVariant.Int),
      QgsField("belowleft", QVariant.Int), QgsField("belowright", QVariant.Int)])
     layer.updateFields()
     layer.startEditing()
     for feature in layer.getFeatures():
       neighbours = self.get_neighbour_features(feature, layer)
-      positions = self.get_related_positions(feature, neighbours) 
-      for pos, f in positions.iteritems():
+      positions = self.get_related_positions(feature, neighbours)
+      for pos, f in positions.items():
         if not feature[pos]:
           feature[pos] = f['ID_MAILLE']
-          layer.updateFeature(feature)        
+          layer.updateFeature(feature)
     layer.commitChanges()
     
        
@@ -377,15 +376,15 @@ class SynoptiquesAtlas:
 
   def createPhysLayerFromList(self, shapePath, layer):
     # Wite to file 
-    error = QgsVectorFileWriter.writeAsVectorFormat(layer, shapePath, \
-      "CP1250", None, "ESRI Shapefile")
+    error, error_string = QgsVectorFileWriter.writeAsVectorFormat(layer, shapePath, \
+      "CP1250", layer.crs(), "ESRI Shapefile")
     if error != QgsVectorFileWriter.NoError:
       QMessageBox.information(self.iface.mainWindow(),"Info", \
-        QCoreApplication.translate("synoptiquesatlas","Error when creating shapefile:\n") + shapePath + QCoreApplication.translate("synoptiquesatlas","\nPlease delete or rename the former grid layers"))           
+        QCoreApplication.translate("synoptiquesatlas","Error when creating shapefile:\n") + shapePath + QCoreApplication.translate("synoptiquesatlas","\nPlease delete or rename the former grid layers"))
 
   def intersect(self, perimetre, calepinage):
   # Intersect between coverage and grid
-    self.centroid_list = []      
+    self.centroid_list = []
     self.splitted_fet_list = []
     i = 0    
     if perimetre and calepinage:
@@ -406,7 +405,7 @@ class SynoptiquesAtlas:
             self.centroid_list.append(a.centroid())
             fet = QgsFeature()
             fet.setGeometry(a)
-            #fet.addAttribute(0, QVariant(i))          
+            #fet.addAttribute(0, QVariant(i))
             self.splitted_fet_list.append(fet)
             i = i + 1
 
@@ -414,23 +413,23 @@ class SynoptiquesAtlas:
     self.interLayer = QgsVectorLayer("Polygon" + "?" + self.URIcrs, "inter_layer", "memory")
     #self.interLayer.setCrs(self.crs)
     pr = self.interLayer.dataProvider()
-    pr.addAttributes([QgsField("ID_INTER", QVariant.Int)])          
+    pr.addAttributes([QgsField("ID_INTER", QVariant.Int)])
     # Add features
-    for fet in self.splitted_fet_list:         
-      pr.addFeatures([fet])      
+    for fet in self.splitted_fet_list:
+      pr.addFeatures([fet])
     self.interLayer.updateExtents()
 
   def centroidsToNewSyno(self, ladder_list):
     layer = QgsVectorLayer("Polygon" + "?" + self.URIcrs, "layer", "memory")
     #layer.setCrs(self.crs)
     pr = layer.dataProvider()
-    pr.addAttributes([QgsField("ID_MAILLE", QVariant.Int)])    
+    pr.addAttributes([QgsField("ID_MAILLE", QVariant.Int)])
     layer.updateFields()
     ladderHeight = self.ladderHeight
     ladderWidth = self.ladderWidth
-    ladder_id = 0           
-    for centr in self.centroid_list: 
-      pt = centr.asPoint()      
+    ladder_id = 0
+    for centr in self.centroid_list:
+      pt = centr.asPoint()
       xMin = pt.x() - ladderWidth/2. - self.overlapW
       xMax = pt.x() + ladderWidth/2. + self.overlapW
       yMin = pt.y() - ladderHeight/2. - self.overlapH
@@ -441,27 +440,27 @@ class SynoptiquesAtlas:
       fet = QgsFeature()
       fet.setGeometry(QgsGeometry.fromRect(ladder))
       fet.setAttributes([ladder_id])
-      ladder_list.append(fet)  
-      pr.addFeatures([fet])      
+      ladder_list.append(fet)
+      pr.addFeatures([fet])
       ladder_id = ladder_id + 1
     layer.updateExtents()
     return layer
 
   def loadQgsVectorLayer(self, shapePath, layerName):
     layerToLoad = QgsVectorLayer(shapePath, layerName, "ogr")
-    if not layerToLoad.isValid():               
+    if not layerToLoad.isValid():
       QMessageBox.information(self.iface.mainWindow(),"Info", \
-        QCoreApplication.translate("synoptiquesatlas","Error while loading layer ") + layerName + " !")  
-    else:    
-      QgsMapLayerRegistry.instance().addMapLayer(layerToLoad)
-      return layerToLoad      
+        QCoreApplication.translate("synoptiquesatlas","Error while loading layer ") + layerName + " !")
+    else:
+      QgsProject.instance().addMapLayer(layerToLoad)
+      return layerToLoad
 
-  def parseSyno(self):    
-    i = 0    
+  def parseSyno(self):
+    i = 0
     while i <= len(self.new_ladders_list) - 1:
-      fet = self.splitted_fet_list[i]      
-      overlapped = False      
-      j = 0      
+      fet = self.splitted_fet_list[i]
+      overlapped = False
+      j = 0
       while j <= i - 1 and not overlapped:
         fet2 = self.new_ladders_list[j]
         # if geom is entirely overlapped by geom2, pop it from list, pop its centroid
@@ -478,12 +477,12 @@ class SynoptiquesAtlas:
       if overlapped:
         self.splitted_fet_list.pop(i)
         self.new_ladders_list.pop(i)
-        self.centroid_list.pop(i)   
+        self.centroid_list.pop(i)
       else:
         i = i + 1
 
   def showHelp(self):
-    showPluginHelp()    
+    showPluginHelp()
 
   def showAbout(self):
     """Show Synoptiques Atlas about dialog box"""

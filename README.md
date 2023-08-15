@@ -1,3 +1,8 @@
+***SEE HERE INSTEAD:***
+https://github.com/AlisterH/coveragebuilder
+
+
+
 qgis-grids-for-atlas
 ====================
 

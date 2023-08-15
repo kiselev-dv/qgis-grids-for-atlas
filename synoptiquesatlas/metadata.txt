@@ -1,11 +1,11 @@
 [general]
 name=Grids for Atlas 2
-description=Create grids for atlas (fork of Grids for Atlas)
-version=version 0.4.0
-author=Dmirty Kiselev
+description=Create grids for atlas
+version=version 0.5.0
+author=Dmitry Kiselev
 email=dmitry.v.kiselev@gmail.com
-qgisMinimumVersion=2.0
-qgisMaximumVersion=2.99
+qgisMinimumVersion=3.0
+qgisMaximumVersion=3.99
 class_name=SynoptiquesAtlas
 website=https://github.com/kiselev-dv/qgis-grids-for-atlas
 experimental=True
